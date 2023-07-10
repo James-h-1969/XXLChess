@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Timer.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">CHESS</a> &gt; <a href="index.source.html" class="el_package">XXLChess</a> &gt; <span class="el_source">Timer.java</span></div><h1>Timer.java</h1><pre class="source lang-java linenums">package XXLChess;
+
+import processing.core.PApplet;
+import processing.core.PImage;
+import processing.core.PGraphics;
+
+public class Timer {
+    /**
+     * time 1 as a string
+     */
+    private String Time1;
+    /**
+     * integer of time 1 minutes
+     */
+    private int Time1mins;
+    /**
+     * integer of time 1 seconds
+     */
+    private int Time1secs;
+    /**
+     * string of time 2
+     */
+    private String Time2;
+    /**
+     * integer of time 2 minutes
+     */
+    private int Time2mins;
+    /**
+     * integer of time 2 seconds
+     */
+    private int Time2secs;
+    /**
+     * FPS timer 1
+     */
+    private int timer1;
+    /**
+     * FPS timer 2
+     */
+    private int timer2;
+    /**
+     * has the time started
+     */
+    private boolean Started;
+    /**
+     * are we counting ontime1
+     */
+    private boolean onTime1;
+    /**
+     * the parent app
+     */
+    private PApplet parent;
+    /**
+     * timer for the computer move
+     */
+    private int computerMoveTimer;
+    /**
+     * player colour for timer 1
+     */
+    private String timer1Colour;
+    /**
+     * increment for the player
+     */
+    private int playerIncrement;
+    /**
+     * increment for the computer/player 2
+     */
+    private int computerIncrement;
+    /**
+     * the players colour
+     */
+    private String playerColour;
+
+    /**
+     * Constructor for the timer class
+     * @param secondsTim1 the amount of seconds for the first timer
+     * @param secondsTim2 the amount of seconds for the second timer
+     * @param parent the parent app
+     * @param timer1Colour the timer 1 colour
+     * @param playerIncrement the amount of time added after every player mvoe
+     * @param computerIncrement the amount of time added after every computer move
+     */
+<span class="fc" id="L82">    public Timer(int secondsTim1, int secondsTim2, PApplet parent, String timer1Colour, int playerIncrement, int computerIncrement){</span>
+<span class="fc" id="L83">        this.Time1mins = secondsTim1/60;</span>
+<span class="fc" id="L84">        this.Time1secs = secondsTim1 % 60;</span>
+<span class="fc" id="L85">        this.Time2mins = secondsTim2/60;</span>
+<span class="fc" id="L86">        this.Time2secs = secondsTim2 % 60;</span>
+<span class="fc" id="L87">        this.timer1 = 0;</span>
+<span class="fc" id="L88">        this.timer2 = 0;</span>
+<span class="fc" id="L89">        this.computerMoveTimer = 0;</span>
+<span class="fc" id="L90">        this.adjustTimes();</span>
+<span class="fc" id="L91">        this.Started = false;</span>
+<span class="fc" id="L92">        this.onTime1 = true;</span>
+<span class="fc" id="L93">        this.parent = parent;</span>
+<span class="fc" id="L94">        this.timer1Colour = timer1Colour;</span>
+<span class="fc" id="L95">        this.playerIncrement = playerIncrement;</span>
+<span class="fc" id="L96">        this.computerIncrement = computerIncrement;</span>
+<span class="fc" id="L97">        this.playerColour = playerColour;</span>
+<span class="fc" id="L98">    }</span>
+    /**
+     * tick the clocks by 1
+     */
+    public void tick(){
+<span class="fc bfc" id="L103" title="All 2 branches covered.">        if (this.Started){</span>
+<span class="pc bpc" id="L104" title="1 of 2 branches missed.">            if (this.Time1secs &gt;= 60){</span>
+<span class="nc" id="L105">                this.Time1secs -= 60;</span>
+<span class="nc" id="L106">                this.Time1mins++;</span>
+            }
+<span class="fc bfc" id="L108" title="All 2 branches covered.">            if (this.Time2secs &gt;= 60){</span>
+<span class="fc" id="L109">                this.Time2secs -= 60;</span>
+<span class="fc" id="L110">                this.Time2mins++;</span>
+            }
+<span class="fc bfc" id="L112" title="All 2 branches covered.">            if (this.onTime1){</span>
+<span class="fc" id="L113">                this.timer1++;</span>
+<span class="fc bfc" id="L114" title="All 2 branches covered.">                if (this.timer1 == 60){</span>
+<span class="fc" id="L115">                    this.Time1secs--;</span>
+<span class="fc bfc" id="L116" title="All 2 branches covered.">                    if (this.Time1secs == -1){</span>
+<span class="fc" id="L117">                        this.Time1mins--;</span>
+<span class="fc" id="L118">                        this.Time1secs = 59;</span>
+                    }
+<span class="fc" id="L120">                    this.timer1 = 0;</span>
+                }
+            } else {
+<span class="fc" id="L123">                this.timer2++;</span>
+<span class="fc bfc" id="L124" title="All 2 branches covered.">                if (this.timer2 == 60){</span>
+<span class="fc" id="L125">                    this.Time2secs--;</span>
+<span class="fc bfc" id="L126" title="All 2 branches covered.">                    if (this.Time2secs == -1){</span>
+<span class="fc" id="L127">                        this.Time2mins--;</span>
+<span class="fc" id="L128">                        this.Time2secs = 59;</span>
+                    }
+<span class="fc" id="L130">                    this.timer2 = 0;</span>
+                }
+            }
+<span class="fc" id="L133">            this.adjustTimes();</span>
+        }
+<span class="fc" id="L135">    }</span>
+    /**
+     * set the clock as started
+     */
+    public void setStarted(){
+<span class="fc" id="L140">        this.Started = true;</span>
+<span class="fc" id="L141">    }</span>
+    
+    /**
+     * set on time 1
+     * @param onTime1 whether on time1 or not
+     */
+    public void setOnTime1(boolean onTime1){
+<span class="fc" id="L148">        this.onTime1 = onTime1;</span>
+<span class="fc" id="L149">    }</span>
+
+    /**
+     * get ont time 1
+     * @return if on time 1
+     */
+    public boolean getOntime1(){
+<span class="fc" id="L156">        return this.onTime1;</span>
+    }
+    /**
+     * draws the timer onto the screen
+     */
+    public void drawTimer(){
+<span class="fc" id="L162">        parent.textSize(30);</span>
+<span class="fc" id="L163">        parent.fill(255);</span>
+<span class="fc" id="L164">        parent.text(this.Time2, 700, 45);</span>
+<span class="fc" id="L165">        parent.text(this.Time1, 700, 650);</span>
+<span class="fc" id="L166">    }</span>
+    /**
+     * adjusts the times from integer to string format
+     */
+    public void adjustTimes(){
+<span class="fc bfc" id="L171" title="All 2 branches covered.">        if (this.Time1secs / 10 != 0){</span>
+<span class="fc" id="L172">                this.Time1 = this.Time1mins + &quot;:&quot; + this.Time1secs;</span>
+        } else {
+<span class="fc" id="L174">            this.Time1 = this.Time1mins + &quot;:0&quot; + this.Time1secs;</span>
+        }
+<span class="fc bfc" id="L176" title="All 2 branches covered.">        if (this.Time2secs / 10 != 0){</span>
+<span class="fc" id="L177">            this.Time2 = this.Time2mins + &quot;:&quot; + this.Time2secs;</span>
+        } else {
+<span class="fc" id="L179">            this.Time2 = this.Time2mins + &quot;:0&quot; + this.Time2secs;</span>
+        }
+<span class="fc" id="L181">    }</span>
+    /**
+     * finds whether any of the times are 0
+     * @return if any time is zero
+     */
+    public boolean isAnyTimeZero(){
+<span class="pc bpc" id="L187" title="2 of 4 branches missed.">        if (this.Time1.equals(&quot;0:00&quot;) || this.Time1.equals(&quot;0:00&quot;)){</span>
+<span class="nc" id="L188">            return true;</span>
+        }
+<span class="fc" id="L190">        return false;</span>
+    }
+    /**
+     * returns whether time 1 is 0
+     * @return if time 1 is 0
+     */
+    public boolean isTime1Zero(){
+<span class="nc bnc" id="L197" title="All 2 branches missed.">        if (this.Time1.equals(&quot;0:00&quot;)){</span>
+<span class="nc" id="L198">            return true;</span>
+        } else {
+<span class="nc" id="L200">            return false;</span>
+        }
+    }
+    /**
+     * returns whether time 2 is zero
+     * @return if time 2 is zero
+     */
+    public boolean isTime2Zero(){
+<span class="nc bnc" id="L208" title="All 2 branches missed.">        if (this.Time2.equals(&quot;0:00&quot;)){</span>
+<span class="nc" id="L209">            return true;</span>
+        } else {
+<span class="nc" id="L211">            return false;</span>
+        }
+    }
+    /**
+     * waits for 2 seconds and then makes computer move
+     * @param FPS the frames per second
+     * @param computer the computer class
+     * @return if still on computer move
+     */
+    public boolean computerTimer(int FPS, Computer computer){
+<span class="nc" id="L221">        this.setOnTime1(false);</span>
+<span class="nc" id="L222">        this.computerMoveTimer++;</span>
+<span class="nc bnc" id="L223" title="All 2 branches missed.">        if (this.computerMoveTimer == FPS * 2 + 1){</span>
+<span class="nc" id="L224">            computer.makeMove();</span>
+<span class="nc" id="L225">            this.computerMoveTimer = 0;           </span>
+<span class="nc" id="L226">            return true;</span>
+        }
+<span class="nc" id="L228">        return false;</span>
+    }
+    /**
+     * gets the colour of the timer 1
+     * @return the colour of whoever is using timer 1
+     */
+    public String getTimer1Colour(){
+<span class="nc" id="L235">        return this.timer1Colour;</span>
+    }
+    /**
+     * increments the player time
+     */
+    public void incrementPlayerTime(){
+<span class="fc" id="L241">        this.Time1secs += this.playerIncrement;</span>
+<span class="fc" id="L242">    }</span>
+    /**
+     * increments the computer time
+     */
+    public void incrementComputerTime(){
+<span class="fc" id="L247">        this.Time2secs += this.computerIncrement;</span>
+<span class="fc" id="L248">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

@@ -1,0 +1,321 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GameLogic.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">CHESS</a> &gt; <a href="index.source.html" class="el_package">XXLChess</a> &gt; <span class="el_source">GameLogic.java</span></div><h1>GameLogic.java</h1><pre class="source lang-java linenums">package XXLChess;
+
+import java.lang.Math;
+
+import processing.core.PImage;
+import processing.core.PApplet;
+import processing.core.PConstants;
+
+import java.io.*;
+import java.util.*;
+import java.lang.Math;
+
+public class GameLogic{
+    /**
+     * Pieces on the board
+     */
+    Pieces Pieces;
+    /**
+     * the board
+     */
+    Board Board;
+    /**
+     * Parent app
+     */
+    PApplet parent;
+    /**
+     * the timer interface
+     */
+    Timer Timer;
+    /**
+     * variable that holds whether player1 is moving
+     */
+    boolean player1Moving;
+    /**
+     * variable that holds whether checkmate is on the board
+     */
+    boolean checkMate;
+    /**
+     * variable that holds the losing colour
+     */
+    String losingColour;
+    /**
+     * variable that holds whether a forfeit takes place
+     */
+    boolean playerForfeit;
+    /**
+     * the colour of the player1
+     */
+    String player1Colour;
+    /**
+     * the colour of player2
+     */
+    String player2Colour;
+    /**
+     * the row of the losing king
+     */
+
+    int losingKingRow;
+    /**
+     * the column of the losing king
+     */
+    int losingKingCol;
+
+    /**
+     * a variable that holds whether two player or not
+     */
+    boolean isTwoPlayer;
+    /**
+     * a variable that holds whether to show the checkmate helpers
+     */
+
+    boolean showingCheckMateHelpers;
+    /**
+     * a variable holding whether in stalemate
+     */
+    boolean inStalemate;
+    /**
+     * whether flashing the king
+     */
+    boolean isFlashingKing;
+    /**
+     * the movement class
+     */
+    Movement Movement;
+
+    
+    /**
+     * Constructor for the gamelogic
+     * @param Pieces the pieces
+     * @param Board the board
+     * @param parent the parent app
+     * @param Timer the timer
+     * @param player1Colour the colour of player 1
+     * @param isTwoPlayer the mode which the chess is played
+     */
+<span class="fc" id="L96">    public GameLogic(Pieces Pieces, Board Board, PApplet parent, Timer Timer, String player1Colour, Boolean isTwoPlayer, Movement Movement){</span>
+<span class="fc" id="L97">        this.Pieces = Pieces;</span>
+<span class="fc" id="L98">        this.Board = Board;</span>
+<span class="fc" id="L99">        this.parent = parent;</span>
+<span class="fc" id="L100">        this.Timer = Timer;</span>
+<span class="fc" id="L101">        this.player1Moving = true;</span>
+<span class="fc" id="L102">        this.checkMate = false;</span>
+<span class="fc" id="L103">        this.losingColour = &quot;&quot;;</span>
+<span class="fc" id="L104">        this.playerForfeit = false;</span>
+<span class="fc" id="L105">        this.losingKingRow = 0;</span>
+<span class="fc" id="L106">        this.losingKingCol = 0;</span>
+<span class="fc" id="L107">        this.showingCheckMateHelpers = false;</span>
+<span class="fc" id="L108">        this.inStalemate = false;</span>
+<span class="fc" id="L109">        this.player1Colour = player1Colour;</span>
+<span class="pc bpc" id="L110" title="1 of 2 branches missed.">        if (player1Colour.equals(&quot;white&quot;)){</span>
+<span class="fc" id="L111">            this.player2Colour = &quot;black&quot;;</span>
+        } else {
+<span class="nc" id="L113">            this.player2Colour = &quot;white&quot;;</span>
+        }
+<span class="fc" id="L115">        this.isTwoPlayer = isTwoPlayer;</span>
+<span class="fc" id="L116">        this.isFlashingKing = false;</span>
+<span class="fc" id="L117">        this.Movement = Movement;</span>
+<span class="fc" id="L118">    }</span>
+
+    /**
+     * Logic for when the mouse is clicked at any point
+     * @param row the row the mouse is clicked
+     * @param column the column the mous is clicked
+     */
+    public void mousePressedGameLogic(int row, int column){
+<span class="fc" id="L126">        Tile TileClicked = this.Board.getTile(row, column);</span>
+        String currentColourMoving;
+<span class="pc bpc" id="L128" title="1 of 2 branches missed.">        if (this.isTwoPlayer){</span>
+<span class="fc bfc" id="L129" title="All 2 branches covered.">            currentColourMoving = this.player1Moving ? this.player1Colour : this.player2Colour;</span>
+        } else {
+<span class="nc" id="L131">            currentColourMoving = this.player1Colour;</span>
+        }
+        
+<span class="pc bpc" id="L134" title="2 of 6 branches missed.">        if (this.Pieces.getPiece(row, column) != null &amp;&amp; !this.Movement.getIsMoving()  &amp;&amp; !this.isKingFlashing()){ //check if a piece has been pressed</span>
+            //get the piece pressed
+<span class="fc" id="L136">            Piece PieceClicked = this.Pieces.getPiece(row, column);</span>
+<span class="fc bfc" id="L137" title="All 2 branches covered.">            if (PieceClicked.getColour().equals(currentColourMoving)){ //if the piece pressed is white</span>
+<span class="fc bfc" id="L138" title="All 2 branches covered.">                if (PieceClicked.getActive()){ //if the piece clicked was already clicked</span>
+<span class="fc" id="L139">                    PieceClicked.setActive(false);</span>
+<span class="fc" id="L140">                    this.Board.resetBoardColours(false, true, true, true, false);</span>
+                }
+                else {
+<span class="fc" id="L143">                    this.Board.resetBoardColours(false, true, true, true, false);</span>
+<span class="fc" id="L144">                    this.Pieces.setActivePiece(row, column); //set the new piece as active</span>
+<span class="fc" id="L145">                    PieceClicked.ShowPotentialMoves(this.Pieces);</span>
+                }
+<span class="fc" id="L147">                this.Board.updateBoardColours();</span>
+<span class="fc bfc" id="L148" title="All 2 branches covered.">            } else if (TileClicked.isRed()){ //check if can be attacked</span>
+<span class="fc" id="L149">                this.Board.resetBoardColours(true, true, true, true, false);</span>
+<span class="fc" id="L150">                this.Board.updateBoardColours();</span>
+<span class="fc" id="L151">                this.Pieces.movePiece(this.Pieces.getActiveCoords()[0], this.Pieces.getActiveCoords()[1], row, column, true); //</span>
+<span class="pc bpc" id="L152" title="1 of 2 branches missed.">                this.player1Moving = !this.player1Moving;</span>
+            } else {
+<span class="pc bpc" id="L154" title="1 of 2 branches missed.">                if(this.Pieces.checkInvalidMove(row, column)){</span>
+<span class="fc" id="L155">                    this.setFlashingKing(true);</span>
+                }
+            }
+<span class="fc" id="L158">        } </span>
+<span class="fc bfc" id="L159" title="All 2 branches covered.">        else if (this.Board.getTile(row, column).isBlue()){</span>
+            //this needs to swap the position of the current active piece and the row + column pressed
+<span class="fc" id="L161">            this.Board.resetBoardColours(true, true, true, true, false);</span>
+<span class="fc" id="L162">            this.Board.updateBoardColours();</span>
+<span class="fc" id="L163">            this.Timer.setStarted();</span>
+<span class="fc" id="L164">            int[] activeCoords = this.Pieces.getActiveCoords();</span>
+<span class="fc" id="L165">            Piece movingPiece = this.Pieces.getPiece(activeCoords[0], activeCoords[1]);</span>
+<span class="fc bfc" id="L166" title="All 4 branches covered.">            if (movingPiece instanceof King &amp;&amp; Math.abs(activeCoords[1] - column) &gt;= 2){</span>
+<span class="pc bpc" id="L167" title="1 of 2 branches missed.">                if (activeCoords[1] - column &gt; 0){ //left move</span>
+<span class="fc" id="L168">                    this.Pieces.movePiece(activeCoords[0], activeCoords[1], activeCoords[0], activeCoords[1] - 2, true); //</span>
+<span class="fc" id="L169">                    this.Pieces.makeCastleMove(true, activeCoords[0]);</span>
+                } else { //right move
+<span class="nc" id="L171">                    this.Pieces.movePiece(activeCoords[0], activeCoords[1], activeCoords[0], activeCoords[1] + 2, true); //</span>
+<span class="nc" id="L172">                    this.Pieces.makeCastleMove(false, activeCoords[0]);</span>
+                }
+<span class="pc bpc" id="L174" title="1 of 2 branches missed.">                this.player1Moving = !player1Moving;</span>
+<span class="fc" id="L175">                return;</span>
+            }
+<span class="fc" id="L177">            this.Pieces.movePiece(activeCoords[0], activeCoords[1], row, column, true); //</span>
+<span class="fc bfc" id="L178" title="All 2 branches covered.">            this.player1Moving = !player1Moving;</span>
+
+<span class="fc" id="L180">        } else {</span>
+            //check whether pressed the invalid move
+<span class="pc bpc" id="L182" title="1 of 2 branches missed.">            if(this.Pieces.checkInvalidMove(row, column)){</span>
+<span class="fc" id="L183">                this.setFlashingKing(true);</span>
+            }
+            //get coords of active
+<span class="fc" id="L186">            int[] activeCoords = this.Pieces.getActiveCoords();</span>
+<span class="pc bpc" id="L187" title="1 of 2 branches missed.">            if (activeCoords[0] != -1){</span>
+<span class="fc" id="L188">                Piece activePiece = this.Pieces.getPiece(activeCoords[0], activeCoords[1]);</span>
+<span class="pc bpc" id="L189" title="1 of 2 branches missed.">                if (activePiece != null){</span>
+<span class="fc" id="L190">                    activePiece.setActive(false);</span>
+                }
+            }
+            
+
+        }
+
+<span class="fc" id="L197">    }</span>
+
+    /**
+     * Gets whether player 1 is moving
+     * @return if player1 is moving
+     */
+    public boolean getPlayer1Move(){
+<span class="fc" id="L204">        return this.player1Moving;</span>
+    }
+    /**
+     * Sets if player 1 is moving
+     * @param player1Moving are they moving
+     */
+    public void setPlayer1Move(boolean player1Moving){
+<span class="nc" id="L211">        this.player1Moving = player1Moving;</span>
+<span class="nc" id="L212">    }</span>
+
+    /**
+     * returns whether there is a checkmate
+     * @return if in checkmae
+     */
+    public boolean getCheckMate(){
+<span class="fc" id="L219">        return this.checkMate;</span>
+    }
+
+    /**
+     * Sets a checkmate
+     * @param row the row of the king
+     * @param column the column of the king
+     * @param losingColour the colour of the losing side
+     */
+    public void setCheckmate(int row, int column, String losingColour){
+<span class="fc" id="L229">        this.checkMate = true;</span>
+<span class="fc" id="L230">        this.Board.getTile(row, column).setDarkRed(true); //set to dark red for checkmate</span>
+<span class="fc" id="L231">        this.losingKingCol = column;</span>
+<span class="fc" id="L232">        this.losingKingRow = row;</span>
+<span class="fc" id="L233">        this.losingColour = losingColour;</span>
+<span class="fc" id="L234">    }</span>
+
+    /**
+     * Retunrs the losing colour
+     * @return the losing colour
+     */
+    public String getLosingColour(){
+<span class="fc" id="L241">        return this.losingColour;</span>
+    }
+    /**
+     * sets the player forfeiting
+     */
+    public void setPlayerForfeit(){
+<span class="fc" id="L247">        this.playerForfeit = true;</span>
+<span class="fc" id="L248">    }</span>
+    /**
+     * gets whether the player forfeited
+     * @return if the player has forfeited
+     */
+    public boolean getPlayerForfeit(){
+<span class="fc" id="L254">        return this.playerForfeit;</span>
+    }
+    /**
+     * gets the losing king row
+     * @return the losing king row
+     */
+    public int getLosingKingRow(){
+<span class="fc" id="L261">        return this.losingKingRow;</span>
+    }
+    /**
+     * gets the losing kind column
+     * @return the row of the losing king
+     */
+    public int getLosingKingCol(){
+<span class="fc" id="L268">        return this.losingKingCol;</span>
+    }
+    /**
+     * sets whether to show the checkmate helpers
+     */
+    public void setShowingCheckMateHelpers(){
+<span class="fc" id="L274">        this.showingCheckMateHelpers = true;</span>
+<span class="fc" id="L275">    }</span>
+    /**
+     * gets whether to show the checkmate helpers
+     * @return whether showing the checkmate helpers
+     */
+    public boolean getShowingCheckMateHelpers(){
+<span class="fc" id="L281">        return this.showingCheckMateHelpers;</span>
+    }
+
+    /**
+     * switches the times between each other
+     */
+    public void switchTimer(){
+<span class="fc bfc" id="L288" title="All 2 branches covered.">        this.Timer.setOnTime1(!this.Timer.getOntime1());</span>
+<span class="fc" id="L289">    }</span>
+
+    /**
+     * is the pieces in stalemate
+     * @return if in stalemate
+     */
+    public boolean isInStaleMate(){
+<span class="fc" id="L296">        return this.inStalemate;</span>
+    }
+
+    /**
+     * sets the board to a stalemate position
+     */
+    public void setStalemate(){
+<span class="fc" id="L303">        this.inStalemate = true;</span>
+<span class="fc" id="L304">    }</span>
+
+        /**
+     * is the pieces in stalemate
+     * @return if in stalemate
+     */
+    public boolean isKingFlashing(){
+<span class="fc" id="L311">        return this.isFlashingKing;</span>
+    }
+
+    /**
+     * sets the board to a stalemate position
+     */
+    public void setFlashingKing(boolean isFlashing){
+<span class="fc" id="L318">        this.isFlashingKing = isFlashing;</span>
+<span class="fc" id="L319">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

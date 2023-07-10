@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Pawn.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">CHESS</a> &gt; <a href="index.source.html" class="el_package">XXLChess</a> &gt; <span class="el_source">Pawn.java</span></div><h1>Pawn.java</h1><pre class="source lang-java linenums">package XXLChess;
+
+import processing.core.PImage;
+import processing.core.PApplet;
+
+public class Pawn extends Piece {
+    private boolean firstMove;
+
+    public Pawn(int xCoord, int yCoord, String colourInput, PApplet parent, Board board, String playerColour){ 
+<span class="fc" id="L10">        super(xCoord, yCoord, colourInput, parent, board, playerColour);</span>
+<span class="fc bfc" id="L11" title="All 2 branches covered.">        if (colourInput.equals(&quot;white&quot;)){</span>
+<span class="fc" id="L12">            this.setSprite(parent.loadImage(&quot;src/main/resources/XXLChess/w-pawn.png&quot;));</span>
+        } else {
+<span class="fc" id="L14">            this.setSprite(parent.loadImage(&quot;src/main/resources/XXLChess/b-pawn.png&quot;));</span>
+        }
+ 
+<span class="pc bpc" id="L17" title="1 of 4 branches missed.">        this.firstMove = yCoord/ 48 == 1 || yCoord/48 == 12;</span>
+
+
+<span class="fc" id="L20">    }</span>
+<span class="nc" id="L21">    public void tick(){}</span>
+
+    public void setFirstMove(){
+<span class="nc" id="L24">        this.firstMove = false;</span>
+<span class="nc" id="L25">    }</span>
+
+
+    public void getMoves(Pieces pieces){
+<span class="fc bfc" id="L29" title="All 2 branches covered.">        if (this.colour.equals(&quot;white&quot;)){</span>
+<span class="pc bpc" id="L30" title="1 of 2 branches missed.">            if (this.firstMove){</span>
+<span class="nc" id="L31">            this.addMove(-2, 0, pieces);</span>
+            } 
+<span class="fc" id="L33">            this.addMove(-1, 0, pieces);</span>
+<span class="fc" id="L34">            this.addMove(-1, 1, pieces);</span>
+<span class="fc" id="L35">            this.addMove(-1, -1, pieces);</span>
+        } else {
+<span class="pc bpc" id="L37" title="1 of 2 branches missed.">            if (this.firstMove){</span>
+<span class="fc" id="L38">                this.addMove(2, 0, pieces);</span>
+            } 
+<span class="fc" id="L40">            this.addMove(1, 0, pieces);</span>
+<span class="fc" id="L41">            this.addMove(1, 1, pieces);</span>
+<span class="fc" id="L42">            this.addMove(1, -1, pieces);</span>
+        }
+        
+<span class="fc" id="L45">    }</span>
+
+    public Pawn copyPiece(Pieces newBoard) {
+<span class="nc" id="L48">        Pawn copy = new Pawn(this.getX(), this.getY(), this.getColour(), this.parent, this.board, this.playerColour);</span>
+<span class="nc" id="L49">        copy.firstMove = this.firstMove;</span>
+<span class="nc" id="L50">        return copy;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

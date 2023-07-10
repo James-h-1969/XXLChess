@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>King.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">CHESS</a> &gt; <a href="index.source.html" class="el_package">XXLChess</a> &gt; <span class="el_source">King.java</span></div><h1>King.java</h1><pre class="source lang-java linenums">package XXLChess;
+
+import processing.core.PImage;
+import processing.core.PApplet;
+
+public class King extends Piece {
+    public boolean hasMoved;
+    public boolean isLeftpossible;
+    public boolean isRightpossible;
+
+    public King(int xCoord, int yCoord, String colourInput, PApplet parent, Board board, String playerColour){ 
+<span class="fc" id="L12">        super(xCoord, yCoord, colourInput, parent, board, playerColour);</span>
+<span class="fc bfc" id="L13" title="All 2 branches covered.">        if (colourInput.equals(&quot;white&quot;)){</span>
+<span class="fc" id="L14">            this.setSprite(parent.loadImage(&quot;src/main/resources/XXLChess/w-king.png&quot;));</span>
+        } else {
+<span class="fc" id="L16">            this.setSprite(parent.loadImage(&quot;src/main/resources/XXLChess/b-king.png&quot;));</span>
+        }
+<span class="fc" id="L18">        this.hasMoved = false;</span>
+<span class="fc" id="L19">        this.isLeftpossible = false;</span>
+<span class="fc" id="L20">        this.isRightpossible = false;</span>
+<span class="fc" id="L21">    }</span>
+<span class="nc" id="L22">    public void tick(){}</span>
+
+    public void getMoves(Pieces pieces){
+<span class="fc" id="L25">        this.addMove(-1, -1, pieces);</span>
+<span class="fc" id="L26">        this.addMove(-1, 0, pieces);</span>
+<span class="fc" id="L27">        this.addMove(-1, 1, pieces);</span>
+<span class="fc" id="L28">        this.addMove(0, -1, pieces);</span>
+<span class="fc" id="L29">        this.addMove(0, 1, pieces);</span>
+<span class="fc" id="L30">        this.addMove(1, -1, pieces);</span>
+<span class="fc" id="L31">        this.addMove(1, 0, pieces);</span>
+<span class="fc" id="L32">        this.addMove(1, 1, pieces);</span>
+<span class="fc" id="L33">        this.addCastlingMove(pieces);</span>
+<span class="fc" id="L34">    }</span>
+
+    public King copyPiece(Pieces newBoard) {
+<span class="nc" id="L37">        King copy = new King(this.getX(), this.getY(), this.getColour(), this.parent, this.board, this.playerColour);</span>
+<span class="nc" id="L38">        return copy;</span>
+    }    
+
+    public void setHasMoved(){
+<span class="fc" id="L42">        this.hasMoved = true;</span>
+<span class="fc" id="L43">        this.isLeftpossible = false;</span>
+<span class="fc" id="L44">        this.isRightpossible = false;</span>
+<span class="fc" id="L45">    }</span>
+    public boolean getHasMoved(){
+<span class="fc" id="L47">        return this.hasMoved;</span>
+    }
+
+    public void addCastlingMove(Pieces pieces){
+<span class="fc bfc" id="L51" title="All 4 branches covered.">        if (!this.getHasMoved() &amp;&amp; this.getColumn() == 7){</span>
+<span class="fc" id="L52">            Piece checkPiece = pieces.getPiece(this.getRow(), 0); //left rook</span>
+<span class="pc bpc" id="L53" title="1 of 2 branches missed.">            if (checkPiece instanceof Rook){</span>
+<span class="fc" id="L54">                Rook leftRook = (Rook) pieces.getPiece(this.getRow(), 0);</span>
+<span class="pc bpc" id="L55" title="1 of 2 branches missed.">                if (!leftRook.getHasMoved()){</span>
+                    //check whether space in between
+<span class="fc" id="L57">                    boolean castlingLeftPossible = true;</span>
+<span class="fc" id="L58">                    int colChange = -1;</span>
+<span class="fc bfc" id="L59" title="All 2 branches covered.">                    while (this.getColumn() + colChange &gt; 1){</span>
+<span class="pc bpc" id="L60" title="1 of 2 branches missed.">                        if (pieces.getPiece(this.getRow(), this.getColumn() + colChange) != null){</span>
+<span class="nc" id="L61">                            castlingLeftPossible = false;</span>
+                        }
+<span class="fc" id="L63">                        colChange--;</span>
+                    }
+<span class="pc bpc" id="L65" title="1 of 2 branches missed.">                    if (castlingLeftPossible){</span>
+<span class="fc" id="L66">                        this.isLeftpossible = true;</span>
+                    } else {
+<span class="nc" id="L68">                        this.isLeftpossible = false;</span>
+                    }
+                }
+            }
+
+
+<span class="fc" id="L74">            checkPiece = pieces.getPiece(this.getRow(), 13); //right rook</span>
+<span class="pc bpc" id="L75" title="1 of 2 branches missed.">            if (checkPiece instanceof Rook){</span>
+<span class="fc" id="L76">                Rook rightRook = (Rook) pieces.getPiece(this.getRow(), 13);</span>
+<span class="pc bpc" id="L77" title="1 of 2 branches missed.">                if (!rightRook.getHasMoved()){</span>
+                    //check whether space in between
+<span class="fc" id="L79">                    boolean castlingRightPossible = true;</span>
+<span class="fc" id="L80">                    int colChange = 1;</span>
+<span class="fc bfc" id="L81" title="All 2 branches covered.">                    while (this.getColumn() + colChange &lt; 13){</span>
+<span class="pc bpc" id="L82" title="1 of 2 branches missed.">                        if (pieces.getPiece(this.getRow(), this.getColumn() + colChange) != null){</span>
+<span class="nc" id="L83">                            castlingRightPossible = false;</span>
+                        }
+<span class="fc" id="L85">                        colChange++;</span>
+                    }
+<span class="pc bpc" id="L87" title="1 of 2 branches missed.">                    if (castlingRightPossible){</span>
+<span class="fc" id="L88">                        this.isRightpossible = true;</span>
+                    } else {
+<span class="nc" id="L90">                        this.isRightpossible = false;</span>
+                    }
+                }
+            }
+            
+        }
+<span class="fc" id="L96">    }</span>
+    
+    public void isCastlingValid(Pieces pieces){
+<span class="fc bfc" id="L99" title="All 2 branches covered.">        if (this.isLeftpossible){</span>
+<span class="fc" id="L100">            pieces.movePiece(this.getRow(), this.getColumn(), this.getRow(), this.getColumn() - 2, false);</span>
+            
+<span class="pc bpc" id="L102" title="1 of 2 branches missed.">            this.isLeftpossible = !pieces.inCheck(this.getColour(), false);</span>
+
+<span class="fc" id="L104">            pieces.undoMove();</span>
+
+        }
+<span class="fc bfc" id="L107" title="All 2 branches covered.">        if (this.isRightpossible){</span>
+<span class="fc" id="L108">            pieces.movePiece(this.getRow(), this.getColumn(), this.getRow(), this.getColumn() + 2, false);</span>
+            
+<span class="pc bpc" id="L110" title="1 of 2 branches missed.">            this.isRightpossible = !pieces.inCheck(this.getColour(), false);</span>
+
+<span class="fc" id="L112">            pieces.undoMove();</span>
+
+        }
+<span class="fc" id="L115">    }</span>
+
+    public void showCastling(Board board){
+<span class="fc bfc" id="L118" title="All 2 branches covered.">        if (this.isLeftpossible){</span>
+<span class="fc" id="L119">            int colChange = -2;</span>
+<span class="fc bfc" id="L120" title="All 2 branches covered.">            while (this.getColumn() + colChange &gt; 0){</span>
+<span class="fc" id="L121">                this.board.getTile(this.getRow(), this.getColumn() + colChange).setBlue(true);</span>
+<span class="fc" id="L122">                colChange--;</span>
+            }
+        }
+<span class="fc bfc" id="L125" title="All 2 branches covered.">        if (this.isRightpossible){</span>
+<span class="fc" id="L126">            int colChange = 2;</span>
+<span class="fc bfc" id="L127" title="All 2 branches covered.">            while (this.getColumn() + colChange &lt; 13){</span>
+<span class="fc" id="L128">                this.board.getTile(this.getRow(), this.getColumn() + colChange).setBlue(true);</span>
+<span class="fc" id="L129">                colChange++;</span>
+            }
+        }
+<span class="fc" id="L132">    }</span>
+
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

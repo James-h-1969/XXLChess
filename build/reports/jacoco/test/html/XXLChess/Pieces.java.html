@@ -1,0 +1,750 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Pieces.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">CHESS</a> &gt; <a href="index.source.html" class="el_package">XXLChess</a> &gt; <span class="el_source">Pieces.java</span></div><h1>Pieces.java</h1><pre class="source lang-java linenums">package XXLChess;
+
+import java.util.*;
+import java.io.*;
+import java.lang.Thread;
+
+import processing.core.PImage;
+import processing.core.PApplet;
+
+
+/*
+
+PIECES: the purpose of this class is to hold each pieces and deal with their interaction due to user input
+
+*/
+
+public class Pieces{
+    /**
+     * array of pieces
+    */
+    protected Piece[][] Pieces;
+    /**
+     * the parent app
+    */
+    protected PApplet parent;
+    /**
+     * the board
+    */
+    protected Board board;
+    /**
+     * the current active piece
+    */
+    protected int[] currentActive;
+    /**
+     * the last move
+    */
+    protected int [] lastmove;
+    /**
+     * the colour of the player
+    */
+    protected String playerColour;
+    /**
+     * whether the player is in check or not
+    */
+    protected boolean playerInCheck;
+    /**
+     * whether anyone is in check
+    */
+    protected boolean inCheck;
+    /**
+     * the last piece taken
+    */
+    Piece lastTaken;
+    /**
+     * the movement class
+    */
+    Movement Movement;
+    /**
+     * the timer
+    */
+    Timer Timer;
+        /**
+     * the row of the checked king
+     */
+    int inCheckKingRow;
+    /**
+     * the column of the cheked king
+     */
+    int inCheckKingCol;
+
+
+
+    /**
+     * The constructor for the pieces class
+     * @param parent the parent app
+     * @param board the board
+     * @param playerColour the colour of the player
+     * @param Movement the movement class
+     * @param Timer the timer
+    */
+<span class="fc" id="L81">    public Pieces(PApplet parent, Board board, String playerColour, Movement Movement, Timer Timer){</span>
+<span class="fc" id="L82">        this.parent = parent;</span>
+<span class="fc" id="L83">        this.board = board;</span>
+
+        //set the active to one off the board
+<span class="fc" id="L86">        this.currentActive = new int[]{-1, -1};</span>
+
+        //setup the pieces of the board 
+<span class="fc" id="L89">        this.Pieces = new Piece[14][14];      </span>
+
+<span class="fc" id="L91">        this.lastmove = new int[4];  </span>
+<span class="fc" id="L92">        this.lastTaken = null;</span>
+
+<span class="fc" id="L94">        this.playerColour = playerColour;</span>
+
+<span class="fc" id="L96">        this.Movement = Movement;</span>
+
+<span class="fc" id="L98">        this.Timer = Timer;</span>
+
+<span class="fc" id="L100">        this.playerInCheck = false;</span>
+
+<span class="fc" id="L102">        this.inCheck = false;</span>
+
+<span class="fc" id="L104">        this.inCheckKingCol = -1;</span>
+<span class="fc" id="L105">        this.inCheckKingRow = -1;</span>
+
+<span class="fc" id="L107">    }</span>
+    /**
+     * sets default positions of the pieces
+     * @param fileName the input file
+    */
+    public void setDefaultPositions(String fileName){
+<span class="fc" id="L113">        File f = new File(fileName);</span>
+        try {
+<span class="fc" id="L115">            Scanner scan = new Scanner(f);</span>
+<span class="fc" id="L116">            int row = 0;</span>
+<span class="fc bfc" id="L117" title="All 2 branches covered.">            while (scan.hasNextLine()){</span>
+<span class="fc" id="L118">                String currentLine = scan.nextLine(); //get the next line</span>
+<span class="fc" id="L119">                int size = currentLine.length();</span>
+<span class="pc bpc" id="L120" title="2 of 4 branches missed.">                if (size &gt; 14 || row &gt;= 14){</span>
+<span class="nc" id="L121">                    this.handleInvalidBoard();</span>
+                }
+
+<span class="fc bfc" id="L124" title="All 2 branches covered.">                if (size &lt; 1){ //if the line is empty</span>
+<span class="fc bfc" id="L125" title="All 2 branches covered.">                    for (int column = 0; column &lt; 14; column++){ //fill with empty cells</span>
+<span class="fc" id="L126">                        this.Pieces[row][column] = null;</span>
+                    }
+                } else {
+<span class="fc bfc" id="L129" title="All 2 branches covered.">                    for (int column = 0; column &lt; size; column++){</span>
+<span class="pc bpc" id="L130" title="2 of 22 branches missed.">                        switch(currentLine.charAt(column)){</span>
+                            case 'R':
+<span class="fc" id="L132">                                this.Pieces[row][column] = new Rook(column*48, row*48, &quot;black&quot;, this.parent, this.board, this.playerColour);</span>
+<span class="fc" id="L133">                                break;</span>
+                            case 'N':
+<span class="fc" id="L135">                                this.Pieces[row][column] = new Knight(column*48, row*48, &quot;black&quot;, this.parent, this.board, this.playerColour);</span>
+<span class="fc" id="L136">                                break;</span>
+                            case 'B':
+<span class="fc" id="L138">                                this.Pieces[row][column] = new Bishop(column*48, row*48, &quot;black&quot;, this.parent, this.board, this.playerColour);</span>
+<span class="fc" id="L139">                                break;</span>
+                            case 'H':
+<span class="fc" id="L141">                                this.Pieces[row][column] = new Archbishop(column*48, row*48, &quot;black&quot;, this.parent, this.board, this.playerColour);</span>
+<span class="fc" id="L142">                                break;</span>
+                            case 'C':
+<span class="fc" id="L144">                                this.Pieces[row][column] = new Camel(column*48, row*48, &quot;black&quot;, this.parent, this.board, this.playerColour);</span>
+<span class="fc" id="L145">                                break;</span>
+                            case 'G':
+<span class="fc" id="L147">                                this.Pieces[row][column] = new Guard(column*48, row*48, &quot;black&quot;, this.parent, this.board, this.playerColour);</span>
+<span class="fc" id="L148">                                break;</span>
+                            case 'A':
+<span class="fc" id="L150">                                this.Pieces[row][column] = new Amazon(column*48, row*48, &quot;black&quot;, this.parent, this.board, this.playerColour);</span>
+<span class="fc" id="L151">                                break;</span>
+                            case 'K':
+<span class="fc" id="L153">                                this.Pieces[row][column] = new King(column*48, row*48, &quot;black&quot;, this.parent, this.board, this.playerColour);</span>
+<span class="fc" id="L154">                                break;</span>
+                            case 'E':
+<span class="fc" id="L156">                                this.Pieces[row][column] = new Chancellor(column*48, row*48, &quot;black&quot;, this.parent, this.board, this.playerColour);</span>
+<span class="fc" id="L157">                                break;</span>
+                            case 'P':
+<span class="fc" id="L159">                                this.Pieces[row][column] = new Pawn(column*48, row*48, &quot;black&quot;, this.parent, this.board, this.playerColour);</span>
+<span class="fc" id="L160">                                break;</span>
+                            case 'p':
+<span class="fc" id="L162">                                this.Pieces[row][column] = new Pawn(column*48, row*48, &quot;white&quot;, this.parent, this.board, this.playerColour);</span>
+<span class="fc" id="L163">                                break;</span>
+                            case 'r':
+<span class="fc" id="L165">                                this.Pieces[row][column] = new Rook(column*48, row*48, &quot;white&quot;, this.parent, this.board, this.playerColour);</span>
+<span class="fc" id="L166">                                break;</span>
+                            case 'n':
+<span class="fc" id="L168">                                this.Pieces[row][column] = new Knight(column*48, row*48, &quot;white&quot;, this.parent, this.board, this.playerColour);</span>
+<span class="fc" id="L169">                                break;</span>
+                            case 'b':
+<span class="fc" id="L171">                                this.Pieces[row][column] = new Bishop(column*48, row*48, &quot;white&quot;, this.parent, this.board, this.playerColour);</span>
+<span class="fc" id="L172">                                break;</span>
+                            case 'h':
+<span class="fc" id="L174">                                this.Pieces[row][column] = new Archbishop(column*48, row*48, &quot;white&quot;, this.parent, this.board, this.playerColour);</span>
+<span class="fc" id="L175">                                break;</span>
+                            case 'c':
+<span class="fc" id="L177">                                this.Pieces[row][column] = new Camel(column*48, row*48, &quot;white&quot;, this.parent, this.board, this.playerColour);</span>
+<span class="fc" id="L178">                                break;</span>
+                            case 'g':
+<span class="fc" id="L180">                                this.Pieces[row][column] = new Guard(column*48, row*48, &quot;white&quot;, this.parent, this.board, this.playerColour);</span>
+<span class="fc" id="L181">                                break;</span>
+                            case 'a':
+<span class="fc" id="L183">                                this.Pieces[row][column] = new Amazon(column*48, row*48, &quot;white&quot;, this.parent, this.board, this.playerColour);</span>
+<span class="fc" id="L184">                                break;</span>
+                            case 'k':
+<span class="fc" id="L186">                                this.Pieces[row][column] = new King(column*48, row*48, &quot;white&quot;, this.parent, this.board, this.playerColour);</span>
+<span class="fc" id="L187">                                break;</span>
+                            case 'e':
+<span class="nc" id="L189">                                this.Pieces[row][column] = new Chancellor(column*48, row*48, &quot;white&quot;, this.parent, this.board, this.playerColour);</span>
+<span class="nc" id="L190">                                break;</span>
+                            case ' ':
+<span class="fc" id="L192">                                this.Pieces[row][column] = null;</span>
+<span class="fc" id="L193">                                break;</span>
+                            default:
+<span class="nc" id="L195">                                this.handleInvalidBoard();</span>
+                        }
+                    }
+<span class="fc bfc" id="L198" title="All 2 branches covered.">                    for (int i = 0; i &lt; 14 - size; i++){</span>
+<span class="fc" id="L199">                        this.Pieces[row][i + size] = null;</span>
+                    }
+                }
+<span class="fc" id="L202">                row++;</span>
+<span class="fc" id="L203">            }</span>
+<span class="nc" id="L204">        } catch (FileNotFoundException e){</span>
+<span class="nc" id="L205">            System.out.println(&quot;Cannot find file&quot;);</span>
+<span class="fc" id="L206">        }</span>
+<span class="fc" id="L207">        this.convertQueens();</span>
+<span class="fc" id="L208">    }</span>
+    /**
+     * Handles when the input of the board is wrong
+     * @param ErrorMessage what to display
+    */
+    public void handleInvalidBoard(){
+<span class="nc" id="L214">        System.out.println(&quot;The board provided is invalid. Please try again.&quot;);</span>
+<span class="nc" id="L215">        System.exit(0);</span>
+<span class="nc" id="L216">    }</span>
+
+    /**
+     * gets the piece given a location
+     * @param row the row of the piece
+     * @param column the column of the piece
+     * @return the piece at the desired positon
+    */
+    public Piece getPiece(int row, int column){
+
+<span class="fc" id="L226">        return this.Pieces[row][column];</span>
+    }
+    /**
+     * gets the active coords 
+     * @return the active coordinates
+    */
+    public int[] getActiveCoords(){
+<span class="fc" id="L233">        return this.currentActive;</span>
+    }
+    /**
+     * gets the array of Pieces
+     * @return the piece array
+    */
+    public Piece[][] getPieces(){
+<span class="fc" id="L240">        return this.Pieces;</span>
+    }
+    /**
+     * gets the last move made
+     * @return the last move
+    */
+    public int[] getlastmove(){
+<span class="fc" id="L247">        return this.lastmove;</span>
+    }
+    /**
+     * gets the movement class
+     * @return the Movement
+    */
+    public Movement getMovement(){
+<span class="fc" id="L254">        return this.Movement;</span>
+    }
+
+    /**
+     * sets the active piece
+     * @param row the row of the active piece
+     * @param column the column of the active piece
+    */
+    public void setActivePiece(int row, int column){
+<span class="fc" id="L263">        Piece newActivePiece = this.Pieces[row][column]; //piece that will become active</span>
+<span class="fc" id="L264">        newActivePiece.setActive(true); //activate the new one</span>
+<span class="fc" id="L265">        this.currentActive = new int[]{row, column}; //set the new active coords  </span>
+<span class="fc" id="L266">        this.board.setGreen(row, column);             </span>
+<span class="fc" id="L267">    }</span>
+    /**
+     * sets the active coords 
+     * @param row new row
+     * @param column new column
+    */
+    // public void setActiveCoords(int row, int column){
+    //     this.currentActive[0] = row;
+    //     this.currentActive[1] = column;
+    // }
+
+    
+    
+    // /**
+    //  * sets all of the pieces as a new array
+    //  * @param newBoard the new array to copy
+    // */
+    // public void setAllPieces(Piece[][] newBoard){
+    //     for (int row = 0; row &lt; 14; row++){ //go through every position
+    //         for (int col = 0; col &lt; 14; col++){
+    //             this.Pieces[row][col] = newBoard[row][col];
+    //         }
+    //     }
+    // }
+    /**
+     * sets the new piece
+     * @param row the row to set
+     * @param column the column to set
+     * @param setPiece the piece to set
+    */
+    public void setPiece(int row, int column, Piece setPiece){
+<span class="fc" id="L298">        this.Pieces[row][column] = setPiece;</span>
+<span class="fc bfc" id="L299" title="All 2 branches covered.">        if (setPiece != null){</span>
+<span class="fc" id="L300">            this.Pieces[row][column].setCoords(row, column);</span>
+        }
+<span class="fc" id="L302">    }</span>
+
+    /**
+     * draws the pieces onto the screen
+    */
+    public void drawPieces(){     
+<span class="fc bfc" id="L308" title="All 2 branches covered.">        for (int row = 0; row &lt; 14; row++){</span>
+<span class="fc bfc" id="L309" title="All 2 branches covered.">            for (int column = 0; column &lt; 14; column++){</span>
+<span class="fc" id="L310">                Piece currentPiece = this.Pieces[row][column];</span>
+<span class="fc bfc" id="L311" title="All 2 branches covered.">                if (currentPiece != null){</span>
+<span class="fc" id="L312">                    currentPiece.draw(this.parent);</span>
+                }
+            }
+        }
+<span class="fc" id="L316">    }</span>
+
+    /**
+     * moves the piece from one point to another
+     * @param prevRow the previous row
+     * @param prevColumn the previous column
+     * @param newRow the new row
+     * @param newCol the new column
+     * @param actuallyMove whether the move is actually being made or not
+    */
+    public void movePiece(int prevRow, int prevColumn, int newRow, int newCol, boolean actuallyMove){
+<span class="fc" id="L327">        Piece toChange = this.Pieces[prevRow][prevColumn]; //moving piece</span>
+<span class="fc" id="L328">        this.lastTaken = this.Pieces[newRow][newCol]; //piece getting taken</span>
+
+<span class="fc bfc" id="L330" title="All 2 branches covered.">        if (actuallyMove){</span>
+<span class="fc" id="L331">            this.setInCheck(false);</span>
+<span class="fc" id="L332">            this.board.resetBoardColours(false, true, true, true, true);</span>
+<span class="pc bpc" id="L333" title="2 of 6 branches missed.">            if (toChange instanceof Pawn &amp;&amp; (prevRow == 12 || prevRow == 1)){</span>
+<span class="nc" id="L334">                Pawn Pawnmoved = (Pawn) toChange;</span>
+<span class="nc" id="L335">                Pawnmoved.setFirstMove();           </span>
+            }
+<span class="fc bfc" id="L337" title="All 2 branches covered.">            if (toChange instanceof King){</span>
+<span class="fc" id="L338">                King Kingmoved = (King) toChange;</span>
+<span class="fc" id="L339">                Kingmoved.setHasMoved();  </span>
+            }
+<span class="fc bfc" id="L341" title="All 2 branches covered.">            if (toChange instanceof Rook){</span>
+<span class="fc" id="L342">                Rook Rookmoved = (Rook) toChange;</span>
+<span class="fc" id="L343">                Rookmoved.setHasMoved();  </span>
+            }
+<span class="fc" id="L345">            this.Movement.setIsMoving(true);</span>
+
+<span class="fc" id="L347">            int vectorX = newCol*48 - prevColumn*48;</span>
+<span class="fc" id="L348">            int vectorY = newRow*48 - prevRow*48;</span>
+<span class="fc" id="L349">            double vectorSize = Math.sqrt(Math.pow(vectorX, 2) + Math.pow(vectorY, 2));</span>
+
+<span class="fc" id="L351">            this.Movement.setInitialVectorSize(vectorSize);</span>
+
+<span class="fc bfc" id="L353" title="All 2 branches covered.">            if (toChange.getColour().equals(this.playerColour)){</span>
+<span class="fc" id="L354">                this.Timer.incrementPlayerTime();</span>
+            } else {
+<span class="fc" id="L356">                this.Timer.incrementComputerTime();</span>
+            }
+
+           
+<span class="fc" id="L360">        } else {</span>
+<span class="fc" id="L361">            toChange.setCoords(newRow, newCol);</span>
+<span class="fc" id="L362">            this.Pieces[newRow][newCol] = toChange;</span>
+<span class="fc" id="L363">            this.Pieces[prevRow][prevColumn] = null;</span>
+        }
+
+
+        
+<span class="fc" id="L368">        toChange.setProjected(newRow, newCol);</span>
+
+
+        //set the lastmove
+<span class="fc" id="L372">        this.lastmove[0] = prevRow;</span>
+<span class="fc" id="L373">        this.lastmove[1] = prevColumn;</span>
+<span class="fc" id="L374">        this.lastmove[2] = newRow;</span>
+<span class="fc" id="L375">        this.lastmove[3] = newCol;</span>
+
+<span class="fc bfc" id="L377" title="All 2 branches covered.">        if (actuallyMove){</span>
+<span class="fc" id="L378">            this.setOrange();</span>
+<span class="fc" id="L379">            this.board.updateBoardColours();</span>
+        }
+   
+<span class="fc" id="L382">    }</span>
+    /**
+     * sets any pawns that need to be queens into queens
+    */
+    public void convertQueens(){
+<span class="fc bfc" id="L387" title="All 2 branches covered.">        for (int row = 0; row &lt; 14; row++){</span>
+<span class="fc bfc" id="L388" title="All 2 branches covered.">            for (int col = 0; col &lt; 14; col++){</span>
+<span class="fc" id="L389">                Piece currentPiece = this.Pieces[row][col];</span>
+<span class="fc bfc" id="L390" title="All 4 branches covered.">                if (currentPiece != null &amp;&amp; currentPiece instanceof Pawn ){</span>
+<span class="pc bpc" id="L391" title="1 of 8 branches missed.">                    if ((this.playerColour.equals(currentPiece.getColour()) &amp;&amp; currentPiece.getY() &lt; 384) || (!this.playerColour.equals(currentPiece.getColour()) &amp;&amp; currentPiece.getY() &gt; 336)){</span>
+<span class="fc" id="L392">                        this.Pieces[row][col] = new Queen(currentPiece.getX(), currentPiece.getY(), currentPiece.getColour(), this.parent, this.board, this.playerColour);</span>
+                    }       
+                }
+            }
+        }
+<span class="fc" id="L397">    }</span>
+
+    /**
+     * returns whether the position is one with a check involved
+     * @param colour the colour attackign the check
+     * @param ActuallyMove whether its an actual move or not
+     * @return if in check or not
+    */
+    public boolean inCheck(String colour, boolean ActuallyMove){
+<span class="fc" id="L406">        int counter = 0;</span>
+<span class="fc bfc" id="L407" title="All 2 branches covered.">        for (int row = 0; row &lt; 14; row++){ //go through every position</span>
+<span class="fc bfc" id="L408" title="All 2 branches covered.">            for (int col = 0; col &lt; 14; col++){</span>
+                //get the piece
+<span class="fc" id="L410">                Piece currentPiece = this.getPieces()[row][col];</span>
+<span class="fc bfc" id="L411" title="All 4 branches covered.">                if (currentPiece != null &amp;&amp; !currentPiece.getColour().equals(colour)){ //if its a rival attacking</span>
+<span class="fc" id="L412">                    currentPiece.getMoves(this);</span>
+<span class="fc bfc" id="L413" title="All 2 branches covered.">                    for (int move = 0; move &lt; currentPiece.getAttackingMoves().size(); move++){</span>
+<span class="fc" id="L414">                        int[] moveCheck = currentPiece.getAttackingMoves().get(move);</span>
+<span class="fc" id="L415">                        Piece attackingPiece = this.getPieces()[moveCheck[2]][moveCheck[3]];</span>
+<span class="pc bpc" id="L416" title="1 of 4 branches missed.">                        if (attackingPiece instanceof King &amp;&amp; attackingPiece.getColour() != currentPiece.getColour()){</span>
+<span class="fc bfc" id="L417" title="All 2 branches covered.">                            if (ActuallyMove){</span>
+<span class="fc" id="L418">                                this.board.getTile(moveCheck[2], moveCheck[3]).setDarkRed(true);</span>
+<span class="fc" id="L419">                                this.setKingCheckCoords(moveCheck[2], moveCheck[3]);</span>
+<span class="pc bpc" id="L420" title="1 of 2 branches missed.">                                if (colour == this.playerColour){</span>
+<span class="nc" id="L421">                                    this.playerInCheck = true;</span>
+                                }
+                                //show the words for check
+<span class="fc" id="L424">                                this.inCheck = true;</span>
+                            }
+
+<span class="fc" id="L427">                            currentPiece.clearMoves();</span>
+<span class="fc" id="L428">                            return true;</span>
+                        }
+
+                    }
+                }
+            }
+        }
+
+<span class="fc" id="L436">        return false;</span>
+    }
+
+    /**
+     * returns the position by back one go
+    */
+    public void undoMove(){
+<span class="fc" id="L443">        int prevRow = this.lastmove[0];</span>
+<span class="fc" id="L444">        int prevCol = this.lastmove[1];</span>
+<span class="fc" id="L445">        int newRow = this.lastmove[2];</span>
+<span class="fc" id="L446">        int newCol = this.lastmove[3];</span>
+
+<span class="fc" id="L448">        this.getPieces()[prevRow][prevCol] = this.getPieces()[newRow][newCol];</span>
+<span class="fc" id="L449">        this.getPieces()[prevRow][prevCol].setCoords(prevRow, prevCol);</span>
+<span class="fc" id="L450">        this.getPieces()[prevRow][prevCol].setProjected(prevRow, prevCol);</span>
+
+<span class="fc" id="L452">        this.getPieces()[newRow][newCol] = this.lastTaken;</span>
+<span class="fc" id="L453">    }</span>
+
+    /**
+     * sets the orange tiles
+    */
+    public void setOrange(){
+<span class="fc" id="L459">        int[] lastmove = this.getlastmove();</span>
+
+<span class="fc" id="L461">        Tile tile1 = this.board.getTile(lastmove[0], lastmove[1]);</span>
+<span class="fc" id="L462">        Tile tile2 = this.board.getTile(lastmove[2], lastmove[3]);</span>
+      
+<span class="fc" id="L464">        tile1.setOrange(true);</span>
+<span class="fc" id="L465">        tile2.setOrange(true);</span>
+<span class="fc" id="L466">    }</span>
+    /**
+     * checks whether the currentposition is now a checkmate
+     * @param GameLogic logic of the game
+     * @param colour the colour the checkmate is happening on
+    */
+    public void CheckCheckmate(GameLogic GameLogic, String colour){
+<span class="fc bfc" id="L473" title="All 2 branches covered.">        if (!this.anyMovePossible(colour)){</span>
+<span class="fc" id="L474">            System.out.println(&quot;no moves possible for:&quot;);</span>
+<span class="fc" id="L475">            System.out.println(colour);</span>
+
+<span class="fc" id="L477">            int kingRow = 0;</span>
+<span class="fc" id="L478">            int kingCol = 0;</span>
+<span class="fc bfc" id="L479" title="All 2 branches covered.">            for (int row = 0; row &lt; 14; row++){ //go through every position</span>
+<span class="fc bfc" id="L480" title="All 2 branches covered.">                for (int col = 0; col &lt; 14; col++){</span>
+<span class="fc" id="L481">                    Piece currentPiece = this.Pieces[row][col];</span>
+<span class="fc bfc" id="L482" title="All 6 branches covered.">                    if (currentPiece != null &amp;&amp; currentPiece instanceof King &amp;&amp; currentPiece.getColour().equals(colour)){</span>
+<span class="fc" id="L483">                        kingRow = row;</span>
+<span class="fc" id="L484">                        kingCol = col;</span>
+                    }
+                }
+            }
+<span class="fc" id="L488">            GameLogic.setCheckmate(kingRow, kingCol, colour);</span>
+        } 
+        
+<span class="fc" id="L491">    }</span>
+    /**
+     * ticks all of the pieces (updates pos)
+     * @param Gamelogic the logic of the game
+    */
+    public void tickPieces(GameLogic Gamelogic){
+<span class="fc bfc" id="L497" title="All 2 branches covered.">        for (int row = 0; row &lt; 14; row++){ //go through every position</span>
+<span class="fc bfc" id="L498" title="All 2 branches covered.">            for (int col = 0; col &lt; 14; col++){</span>
+<span class="fc" id="L499">                Piece currentPiece = this.getPieces()[row][col];</span>
+<span class="fc bfc" id="L500" title="All 2 branches covered.">                if (currentPiece != null){</span>
+<span class="fc" id="L501">                    currentPiece.updatePos(this, Gamelogic);</span>
+                }
+            }
+        }
+<span class="fc" id="L505">    }</span>
+
+    // public void printPieces(){
+    //     for (int row = 0; row &lt; 14; row++){ //go through every position
+    //         for (int col = 0; col &lt; 14; col++){
+    //             Piece currentPiece = this.getPieces()[row][col];
+    //             System.out.println(currentPiece);
+    //         }
+    //     }
+    // }
+    /**
+     * shows which pieces contributed to the checkmate
+     * @param losingColour the colour that got checkmated
+     * @param row the row of the king
+     * @param column the column of the king
+    */
+    public void showCheckmateHelpers(String losingColour, int row, int column){
+<span class="fc" id="L522">        this.board.resetBoardColours(false, true, true, true, true);</span>
+        //checkmate occurs on row, column being the king
+<span class="fc bfc" id="L524" title="All 2 branches covered.">        for (int i = -1; i &lt; 2; i++){</span>
+<span class="fc bfc" id="L525" title="All 2 branches covered.">            for (int j = -1; j &lt; 2; j++){</span>
+<span class="pc bpc" id="L526" title="6 of 14 branches missed.">                if (row + i &lt; 14 &amp;&amp; row + i &gt; 0 &amp;&amp; column + j &lt; 14 &amp;&amp; column + j &gt; 0 &amp;&amp; this.getPiece(row + i, column + j) == null &amp;&amp; !(i == 0 &amp;&amp; j == 0)){</span>
+<span class="fc" id="L527">                    boolean searchingForAttackingPiece = true;</span>
+<span class="fc" id="L528">                    System.out.println(&quot;BeginningSearch&quot;);</span>
+<span class="fc bfc" id="L529" title="All 2 branches covered.">                    for (int k = 0; k &lt; 14; k++){</span>
+<span class="fc bfc" id="L530" title="All 2 branches covered.">                        for (int m = 0; m &lt; 14; m++){</span>
+<span class="fc" id="L531">                            System.out.printf(&quot;%d, %d\n&quot;, k, m);</span>
+<span class="fc bfc" id="L532" title="All 2 branches covered.">                            if (searchingForAttackingPiece){</span>
+<span class="fc" id="L533">                                Piece attackingPiece = this.getPiece(k, m);</span>
+<span class="fc bfc" id="L534" title="All 4 branches covered.">                                if (attackingPiece != null &amp;&amp; !attackingPiece.getColour().equals(losingColour)){</span>
+<span class="fc" id="L535">                                    attackingPiece.getMoves(this);</span>
+<span class="fc bfc" id="L536" title="All 2 branches covered.">                                    for (int z = 0; z &lt; attackingPiece.getLegalMoves().size(); z++){</span>
+<span class="fc" id="L537">                                        int[] move = attackingPiece.getLegalMoves().get(z);</span>
+<span class="fc" id="L538">                                        int attackingRow = move[2];</span>
+<span class="fc" id="L539">                                        int attackingCol = move[3];</span>
+<span class="fc bfc" id="L540" title="All 4 branches covered.">                                        if (attackingRow == row + i &amp;&amp; attackingCol == column + j){</span>
+<span class="fc" id="L541">                                            int startingRow = move[0];</span>
+<span class="fc" id="L542">                                            int startingCol = move[1];</span>
+<span class="fc" id="L543">                                            this.board.getTile(startingRow, startingCol).setRed(true);</span>
+<span class="fc" id="L544">                                            this.board.updateBoardColours();</span>
+<span class="fc" id="L545">                                            searchingForAttackingPiece = false;</span>
+<span class="fc" id="L546">                                            break;</span>
+                                        }
+                                    }
+                                }
+                            } else {
+                                break;
+                            }
+                        }
+
+                    }
+<span class="fc" id="L556">                } else {</span>
+<span class="fc" id="L557">                    System.out.println(&quot;skipped&quot;);</span>
+                }
+            }
+        }
+<span class="fc" id="L561">        System.out.println(&quot;finished finding pieces&quot;);</span>
+<span class="fc" id="L562">        this.board.drawBoard(); //draw the board</span>
+<span class="fc" id="L563">        this.drawPieces();</span>
+<span class="fc" id="L564">    }</span>
+
+    public boolean checkInvalidMove(int row, int column){      
+<span class="fc" id="L567">        int[] currentActive = this.currentActive;</span>
+<span class="pc bpc" id="L568" title="1 of 2 branches missed.">        if (currentActive[0] == -1){</span>
+<span class="nc" id="L569">            return false;</span>
+        }
+
+<span class="fc" id="L572">        Piece activePiece = this.getPiece(currentActive[0], currentActive[1]);</span>
+<span class="pc bpc" id="L573" title="1 of 2 branches missed.">        if (activePiece != null){</span>
+<span class="fc" id="L574">            activePiece.getMoves(this);</span>
+<span class="fc" id="L575">            List&lt;int[]&gt; initialLegalMoves = new ArrayList&lt;int[]&gt;();</span>
+<span class="fc" id="L576">            List&lt;int[]&gt; initialAttackingMoves = new ArrayList&lt;int[]&gt;();</span>
+<span class="fc" id="L577">            List&lt;int[]&gt; finalLegalMoves = new ArrayList&lt;int[]&gt;();</span>
+<span class="fc" id="L578">            List&lt;int[]&gt; finalAttackingMoves = new ArrayList&lt;int[]&gt;();</span>
+
+<span class="fc bfc" id="L580" title="All 2 branches covered.">            for (int[] move : activePiece.getLegalMoves()){</span>
+<span class="fc" id="L581">                initialLegalMoves.add(move);</span>
+<span class="fc" id="L582">            }</span>
+  
+<span class="fc bfc" id="L584" title="All 2 branches covered.">            for (int[] move : activePiece.getAttackingMoves()){</span>
+<span class="fc" id="L585">                initialAttackingMoves.add(move);</span>
+<span class="fc" id="L586">            }</span>
+
+<span class="fc" id="L588">            activePiece.cleanMoveSet(this);</span>
+
+<span class="fc bfc" id="L590" title="All 2 branches covered.">            for (int[] move : activePiece.getLegalMoves()){</span>
+<span class="fc" id="L591">                finalLegalMoves.add(move);</span>
+<span class="fc" id="L592">            }</span>
+<span class="pc bpc" id="L593" title="1 of 2 branches missed.">            for (int[] move : activePiece.getAttackingMoves()){</span>
+<span class="nc" id="L594">                finalAttackingMoves.add(move);</span>
+<span class="nc" id="L595">            }</span>
+
+
+<span class="fc" id="L598">            List&lt;int[]&gt; illegalMoves = new ArrayList&lt;&gt;();</span>
+
+
+            // iterate over all possible moves
+<span class="fc bfc" id="L602" title="All 2 branches covered.">            for (int[] initialMove : initialLegalMoves) {</span>
+                
+<span class="fc" id="L604">                boolean found = false;</span>
+                // check if the move is present in the list of legal moves
+<span class="fc bfc" id="L606" title="All 2 branches covered.">                for (int[] finalMove : finalLegalMoves) {</span>
+<span class="fc bfc" id="L607" title="All 2 branches covered.">                    if (Arrays.equals(initialMove, finalMove)) {</span>
+<span class="fc" id="L608">                        found = true;</span>
+<span class="fc" id="L609">                        break;</span>
+                    }
+<span class="fc" id="L611">                }</span>
+                // if the move was not found in the list of legal moves, add it to the list of illegal moves
+<span class="fc bfc" id="L613" title="All 2 branches covered.">                if (!found) {</span>
+<span class="fc" id="L614">                    illegalMoves.add(initialMove);</span>
+                }
+<span class="fc" id="L616">            }</span>
+<span class="fc bfc" id="L617" title="All 2 branches covered.">            for (int[] initialMove : initialAttackingMoves) {</span>
+<span class="fc" id="L618">                boolean found = false;</span>
+                // check if the move is present in the list of legal moves
+<span class="pc bpc" id="L620" title="1 of 2 branches missed.">                for (int[] finalMove : finalAttackingMoves) {</span>
+<span class="nc bnc" id="L621" title="All 2 branches missed.">                    if (Arrays.equals(initialMove, finalMove)) {</span>
+<span class="nc" id="L622">                        found = true;</span>
+<span class="nc" id="L623">                        break;</span>
+                    }
+<span class="nc" id="L625">                }</span>
+                // if the move was not found in the list of legal moves, add it to the list of illegal moves
+<span class="pc bpc" id="L627" title="1 of 2 branches missed.">                if (!found) {</span>
+<span class="fc" id="L628">                    illegalMoves.add(initialMove);</span>
+                }
+<span class="fc" id="L630">            }</span>
+<span class="pc bpc" id="L631" title="1 of 2 branches missed.">            for (int[] move : illegalMoves){</span>
+<span class="fc bfc" id="L632" title="All 4 branches covered.">                if (move[2] == row &amp;&amp; move[3] == column){</span>
+<span class="fc" id="L633">                    return true;</span>
+                }
+<span class="fc" id="L635">            }</span>
+<span class="nc" id="L636">            return false;</span>
+        }
+<span class="nc" id="L638">        return false;</span>
+        
+
+
+    }
+    /**
+     * returns whether position is in check
+     * @return if in check positions
+    */
+    public boolean isInCheck(){
+<span class="fc" id="L648">        return this.inCheck;</span>
+    }
+    /**
+     * sets if position is in check
+     * @param inCheck whether it is in check
+    */
+    public void setInCheck(boolean inCheck){
+<span class="fc" id="L655">        this.inCheck = inCheck;</span>
+<span class="fc" id="L656">    }</span>
+    /**
+     * gets the player colour
+     * @return the player colour
+    */
+    public String getPlayerColour(){
+<span class="nc" id="L662">        return this.playerColour;</span>
+    }
+
+    public boolean anyMovePossible(String colour){
+<span class="fc" id="L666">        int counter = 0;</span>
+<span class="fc bfc" id="L667" title="All 2 branches covered.">        for (int row = 0; row &lt; 14; row++){ //go through every position</span>
+<span class="fc bfc" id="L668" title="All 2 branches covered.">            for (int col = 0; col &lt; 14; col++){</span>
+<span class="fc" id="L669">                Piece currentPiece = this.getPieces()[row][col];</span>
+<span class="fc bfc" id="L670" title="All 4 branches covered.">                if (currentPiece != null &amp;&amp; currentPiece.getColour().equals(colour)){</span>
+<span class="fc" id="L671">                    currentPiece.clearMoves();</span>
+<span class="fc" id="L672">                    currentPiece.getMoves(this);</span>
+<span class="fc" id="L673">                    currentPiece.cleanMoveSet(this);</span>
+<span class="fc" id="L674">                    counter += currentPiece.getAttackingMoves().size();</span>
+<span class="fc" id="L675">                    counter += currentPiece.getLegalMoves().size();</span>
+                }
+            }
+        }
+<span class="fc bfc" id="L679" title="All 2 branches covered.">        if (counter != 0){</span>
+<span class="fc" id="L680">            return true;</span>
+        } else {
+<span class="fc" id="L682">            return false;</span>
+        }
+    }
+
+    public void setKingCheckCoords(int row, int column){
+<span class="fc" id="L687">        this.inCheckKingCol = column;</span>
+<span class="fc" id="L688">        this.inCheckKingRow = row;</span>
+<span class="fc" id="L689">    }</span>
+
+    public int getKingCheckRow(){
+<span class="fc" id="L692">        return this.inCheckKingRow;</span>
+    }
+
+    public int getKingCheckCol(){
+<span class="fc" id="L696">        return this.inCheckKingCol;</span>
+    }
+
+    public void makeCastleMove(boolean isLeft, int row){
+
+<span class="fc" id="L701">        Piece toChange = this.Pieces[row][7]; //moving king</span>
+
+<span class="fc" id="L703">        this.setInCheck(false);</span>
+<span class="fc" id="L704">        this.board.resetBoardColours(false, true, true, true, true);</span>
+<span class="fc" id="L705">        King Kingmoved = (King) toChange;</span>
+<span class="fc" id="L706">        Kingmoved.setHasMoved();  </span>
+
+<span class="fc" id="L708">        this.Movement.setIsMoving(true);</span>
+
+
+<span class="fc" id="L711">        this.Movement.setInitialVectorSize(6);</span>
+
+<span class="pc bpc" id="L713" title="1 of 2 branches missed.">        if (isLeft){</span>
+<span class="fc" id="L714">            toChange.setProjected(row, 5);</span>
+        } else {
+<span class="nc" id="L716">            toChange.setProjected(row, 9);</span>
+        }
+
+
+
+<span class="fc" id="L721">        this.Movement.setIsCastling(true);</span>
+<span class="pc bpc" id="L722" title="1 of 2 branches missed.">        if (isLeft){</span>
+<span class="fc" id="L723">            Rook toMove = (Rook) this.getPiece(row, 0);</span>
+<span class="fc" id="L724">            toMove.setProjected(row, 6);</span>
+<span class="fc" id="L725">            toMove.clearMoves();</span>
+<span class="fc" id="L726">        } else {</span>
+<span class="nc" id="L727">            Rook toMove = (Rook) this.getPiece(row, 13);</span>
+<span class="nc" id="L728">            toMove.setProjected(row, 8);</span>
+<span class="nc" id="L729">            toMove.clearMoves();</span>
+        }
+
+<span class="fc" id="L732">        this.Movement.setIsLeft(isLeft);</span>
+
+
+
+
+<span class="pc bpc" id="L737" title="1 of 2 branches missed.">        if (toChange.getColour().equals(this.playerColour)){</span>
+<span class="nc" id="L738">            this.Timer.incrementPlayerTime();</span>
+        } else {
+<span class="fc" id="L740">            this.Timer.incrementComputerTime();</span>
+        }
+
+<span class="fc" id="L743">        toChange.clearMoves();</span>
+
+        // deal with orange
+<span class="fc" id="L746">    }</span>
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

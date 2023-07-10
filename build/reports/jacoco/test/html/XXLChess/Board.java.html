@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Board.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">CHESS</a> &gt; <a href="index.source.html" class="el_package">XXLChess</a> &gt; <span class="el_source">Board.java</span></div><h1>Board.java</h1><pre class="source lang-java linenums">package XXLChess;
+
+import processing.core.PApplet;
+import processing.core.PImage;
+import processing.core.PGraphics;
+
+import java.lang.Thread;
+
+public class Board {
+    /**
+     * Holds the parent App
+     */
+    PApplet parent;
+    /**
+     * List of all the tiles
+     */
+    Tile[][] Tiles;
+    /**
+     * Row of the green active tile
+     */
+    int CurrentGreenRow;
+    /**
+     * Column of the green active tile
+     */
+    int CurrentGreenColumn;
+    /**
+     * counter for the fps for flashing
+     */
+    public int counter;
+
+    /**
+     * Constructor for the board, takes in the app as an input
+     * @param parent the parent app
+     */
+<span class="fc" id="L35">    public Board(PApplet parent){</span>
+<span class="fc" id="L36">        this.CurrentGreenRow = -1;</span>
+<span class="fc" id="L37">        this.CurrentGreenColumn = -1;</span>
+<span class="fc" id="L38">        this.parent = parent;</span>
+<span class="fc" id="L39">        this.Tiles = new Tile[14][14];</span>
+<span class="fc" id="L40">        boolean WhiteColour = true;</span>
+<span class="fc" id="L41">        int xVal = 0;</span>
+<span class="fc" id="L42">        int yVal = 0;</span>
+<span class="fc bfc" id="L43" title="All 2 branches covered.">        for (int i = 0; i &lt; 14; i++){</span>
+<span class="fc bfc" id="L44" title="All 2 branches covered.">            for (int j = 0; j&lt; 14; j++){</span>
+<span class="fc bfc" id="L45" title="All 2 branches covered.">                if (WhiteColour){</span>
+<span class="fc" id="L46">                    this.Tiles[i][j] = new Tile(&quot;white&quot;, 255, 238, 178, xVal, yVal);</span>
+                } else {
+<span class="fc" id="L48">                    this.Tiles[i][j] = new Tile(&quot;black&quot;, 205, 172, 119, xVal, yVal);    </span>
+                }
+<span class="fc" id="L50">                xVal += 48;</span>
+<span class="fc bfc" id="L51" title="All 2 branches covered.">                WhiteColour = !WhiteColour;</span>
+            }
+<span class="fc" id="L53">            xVal = 0;</span>
+<span class="fc" id="L54">            yVal += 48;</span>
+<span class="fc bfc" id="L55" title="All 2 branches covered.">            WhiteColour = !WhiteColour;</span>
+        }
+<span class="fc" id="L57">        this.counter = 0;</span>
+<span class="fc" id="L58">    }</span>
+
+    /**
+     * Draw the board to the screen
+     */
+    public void drawBoard(){
+<span class="fc bfc" id="L64" title="All 2 branches covered.">        for (int i = 0; i &lt; 14; i++){</span>
+<span class="fc bfc" id="L65" title="All 2 branches covered.">            for (int j = 0; j&lt; 14; j++){</span>
+<span class="fc" id="L66">                Tile currentTile = this.Tiles[i][j];</span>
+<span class="fc" id="L67">                this.parent.noStroke();</span>
+<span class="fc" id="L68">                this.parent.fill(currentTile.getR(), currentTile.getG(), currentTile.getB()); // sets the fill color to red</span>
+<span class="fc" id="L69">                this.parent.rect(currentTile.getXcoords(), currentTile.getYcoords(), 48, 48); // draws a rectangle with top-left corner at (50, 50) and width=height=100</span>
+            }
+        }
+<span class="fc" id="L72">    }</span>
+
+    /**
+     * Gets a single tile based off a row and column
+     * @param row the row of the tile
+     * @param column the column of the tile
+     * @return the tile
+     */
+    public Tile getTile(int row, int column){
+<span class="fc" id="L81">        return this.Tiles[row][column];</span>
+    }
+
+    /**
+     * Clears the green tile
+     */
+    public void clearGreen(){
+<span class="fc" id="L88">        this.getTile(CurrentGreenRow, CurrentGreenColumn).setGreen(false);  </span>
+<span class="fc" id="L89">    }</span>
+
+
+    /**
+     * Sets the tile at the specified row and column as the green one
+     * @param row the row of the new green
+     * @param column the column of the new green
+     */
+    public void setGreen(int row, int column){ 
+<span class="fc bfc" id="L98" title="All 2 branches covered.">        if (this.CurrentGreenRow != -1){ //this does a check to reset the old active tile</span>
+<span class="fc" id="L99">            this.clearGreen();  </span>
+        } 
+        
+<span class="fc" id="L102">        Tile currentTile = this.getTile(row, column);</span>
+
+        //changes the tile to the required colour (lighter for the white and darker for black)
+  
+<span class="fc" id="L106">        currentTile.setGreen(true);</span>
+
+        //sets the current Green coords
+<span class="fc" id="L109">        this.CurrentGreenRow = row;</span>
+<span class="fc" id="L110">        this.CurrentGreenColumn = column;</span>
+<span class="fc" id="L111">    }</span>
+
+    /**
+     * Resets all the board colours if they have changed
+     * @param resetDarkRed does dark red need to be reset
+     * @param resetRed does red need to be reset
+     * @param resetGreen does green need to be reset
+     * @param resetBlue does blue need to be reset
+     * @param resetOrange does orange need to be reset
+     */
+    public void resetBoardColours(boolean resetDarkRed, boolean resetRed, boolean resetGreen, boolean resetBlue, boolean resetOrange){
+<span class="fc bfc" id="L122" title="All 2 branches covered.">        for (int i = 0; i &lt; 14; i++){</span>
+<span class="fc bfc" id="L123" title="All 2 branches covered.">            for (int j = 0; j &lt; 14; j++){</span>
+<span class="fc" id="L124">                Tile checkTile = this.Tiles[i][j];</span>
+<span class="fc bfc" id="L125" title="All 4 branches covered.">                if (resetDarkRed &amp;&amp; checkTile.isDarkRed()){</span>
+<span class="fc" id="L126">                    checkTile.setDarkRed(false);</span>
+                }
+<span class="pc bpc" id="L128" title="1 of 4 branches missed.">                if (resetRed &amp;&amp; checkTile.isRed()){</span>
+<span class="fc" id="L129">                    checkTile.setRed(false);</span>
+                }
+<span class="pc bpc" id="L131" title="1 of 4 branches missed.">                if (resetGreen &amp;&amp; checkTile.isGreen()){</span>
+<span class="fc" id="L132">                    checkTile.setGreen(false);</span>
+                }
+<span class="pc bpc" id="L134" title="1 of 4 branches missed.">                if (resetBlue &amp;&amp; checkTile.isBlue()){</span>
+<span class="fc" id="L135">                    checkTile.setBlue(false);</span>
+                }
+<span class="fc bfc" id="L137" title="All 4 branches covered.">                if (resetOrange &amp;&amp; checkTile.isOrange()){</span>
+<span class="fc" id="L138">                    checkTile.setOrange(false);</span>
+                }
+<span class="fc bfc" id="L140" title="All 2 branches covered.">                if (checkTile.getDefaultColour() == &quot;white&quot;){</span>
+<span class="fc" id="L141">                    checkTile.changeColour(255, 238, 178);</span>
+                } else {
+<span class="fc" id="L143">                    checkTile.changeColour(205, 172, 119);</span>
+                }
+            }
+        }
+<span class="fc" id="L147">    }</span>
+
+    /**
+     * 
+     * Updates the new board colours of the tiles
+     */
+    public void updateBoardColours(){
+<span class="fc bfc" id="L154" title="All 2 branches covered.">        for (int i = 0; i &lt; 14; i++){</span>
+<span class="fc bfc" id="L155" title="All 2 branches covered.">            for (int j = 0; j &lt; 14; j++){</span>
+<span class="fc" id="L156">                Tile checkTile = this.Tiles[i][j];</span>
+<span class="fc bfc" id="L157" title="All 2 branches covered.">                if (checkTile.isDarkRed()){</span>
+                    //update to make tile darkred
+<span class="fc" id="L159">                    checkTile.changeColour(122, 0, 0);</span>
+
+<span class="fc bfc" id="L161" title="All 2 branches covered.">                } else if (checkTile.isGreen()){</span>
+                    //update to make tile green
+<span class="fc" id="L163">                    checkTile.changeColour(105, 138, 76);</span>
+                
+<span class="fc bfc" id="L165" title="All 2 branches covered.">                } else if (checkTile.isRed()){</span>
+                    //update to make tile red
+<span class="fc" id="L167">                    checkTile.changeColour(255, 164, 102);</span>
+
+<span class="fc bfc" id="L169" title="All 2 branches covered.">                } else if (checkTile.isBlue()){</span>
+                    //update to make tile red
+<span class="fc bfc" id="L171" title="All 2 branches covered.">                    if (checkTile.getDefaultColour().equals(&quot;white&quot;)){</span>
+<span class="fc" id="L172">                        checkTile.changeColour(196, 224, 232);</span>
+                    } else {
+<span class="fc" id="L174">                        checkTile.changeColour(170, 210, 221);</span>
+                    }
+<span class="fc bfc" id="L176" title="All 2 branches covered.">                } else if (checkTile.isOrange()){</span>
+                    //update to make tile orange
+<span class="fc bfc" id="L178" title="All 2 branches covered.">                    if (checkTile.getDefaultColour().equals(&quot;white&quot;)){</span>
+<span class="fc" id="L179">                        checkTile.changeColour(205, 210, 106);</span>
+                    } else {
+<span class="fc" id="L181">                        checkTile.changeColour(170, 162, 58);</span>
+                    }
+                } 
+            }
+        }
+<span class="fc" id="L186">    }</span>
+
+    public boolean flashKing(int row, int col){
+<span class="fc" id="L189">        this.counter++;</span>
+<span class="fc bfc" id="L190" title="All 2 branches covered.">        if (this.counter % 30 == 0){</span>
+<span class="fc" id="L191">            Tile flashTile = this.getTile(row, col);</span>
+<span class="fc bfc" id="L192" title="All 2 branches covered.">            if (flashTile.getR() == 255){</span>
+<span class="fc" id="L193">                flashTile.changeColour(120, 0, 0);</span>
+            } else {
+<span class="fc" id="L195">                flashTile.changeColour(255, 255, 255);</span>
+            }
+<span class="fc bfc" id="L197" title="All 2 branches covered.">            if (this.counter == 120){</span>
+<span class="fc" id="L198">                this.counter = 0;</span>
+<span class="fc" id="L199">                return false;</span>
+            }
+        }
+<span class="fc" id="L202">        return true;</span>
+    }
+    
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

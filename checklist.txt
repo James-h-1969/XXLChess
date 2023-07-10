@@ -1,0 +1,23 @@
+TO DO:
+
+#####       BUGS   ######
+-> Still taking its own piece for the computer
+
+
+
+
+
+
+######    DOCUMENTATION   ######
+
+-> testcases
+
+
+
+
+
+
+
+
+
+

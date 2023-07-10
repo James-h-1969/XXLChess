@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Camel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">CHESS</a> &gt; <a href="index.source.html" class="el_package">XXLChess</a> &gt; <span class="el_source">Camel.java</span></div><h1>Camel.java</h1><pre class="source lang-java linenums">package XXLChess;
+
+import processing.core.PImage;
+import processing.core.PApplet;
+
+public class Camel extends Piece {
+    public Camel(int xCoord, int yCoord, String colourInput, PApplet parent, Board board, String playerColour){ 
+<span class="fc" id="L8">        super(xCoord, yCoord, colourInput, parent, board, playerColour);</span>
+<span class="fc bfc" id="L9" title="All 2 branches covered.">        if (colourInput.equals(&quot;white&quot;)){</span>
+<span class="fc" id="L10">            this.setSprite(parent.loadImage(&quot;src/main/resources/XXLChess/w-camel.png&quot;));</span>
+        } else {
+<span class="fc" id="L12">            this.setSprite(parent.loadImage(&quot;src/main/resources/XXLChess/b-camel.png&quot;));</span>
+        }
+<span class="fc" id="L14">    }</span>
+<span class="nc" id="L15">    public void tick(){}</span>
+
+    public void getMoves(Pieces pieces){
+<span class="fc" id="L18">        this.addMove(-3, -1,  pieces);</span>
+<span class="fc" id="L19">        this.addMove(-1, -3, pieces);</span>
+<span class="fc" id="L20">        this.addMove(-3, 1, pieces);</span>
+<span class="fc" id="L21">        this.addMove(-1, 3, pieces);</span>
+<span class="fc" id="L22">        this.addMove(3, -1, pieces);</span>
+<span class="fc" id="L23">        this.addMove(1, -3, pieces);</span>
+<span class="fc" id="L24">        this.addMove(3, 1, pieces);</span>
+<span class="fc" id="L25">        this.addMove(1, 3, pieces); </span>
+<span class="fc" id="L26">    }</span>
+
+    public Camel copyPiece(Pieces newBoard) {
+<span class="nc" id="L29">        Camel copy = new Camel(this.getX(), this.getY(), this.getColour(), this.parent, this.board, this.playerColour);</span>
+<span class="nc" id="L30">        return copy;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
